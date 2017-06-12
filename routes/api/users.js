@@ -177,7 +177,7 @@ router.post('/users/login', function(req, res, next){
         }
     }).then(user => {
         if (user && user.validPassword(req.body.user.password)) {
-            return res.json(user.toAuthJSON());
+            return res.json({user: user.toAuthJSON()});
         } else {
             return res.status(401).json({
                 errors: {
