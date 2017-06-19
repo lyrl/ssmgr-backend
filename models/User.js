@@ -32,11 +32,13 @@ const User = sequelize.define('user', {
     status: {
         type: Sequelize.STRING(24),
         allowNull: false,
-        defaultValue: 0
+        defaultValue: "actived",
+        comment: "用户状态 待激活  wait_for_active， 已激活  actived， 已冻结  freezed， 已注销 canceled"
     }
 }, {
     timestamps: true,
     underscored: true,
+    paranoid: true,
     tableName: 't_user',
     comment: '用户表'
 }
