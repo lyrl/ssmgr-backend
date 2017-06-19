@@ -84,7 +84,9 @@ router.get('/users', auth.required, function (req, res, next) {
 router.post('/users', function (req, res, next) {
     logger.info('用户注册!', req.body.user);
 
-    var user = User.build(req.body.user);
+    const regUser = req.body.user;
+
+    const user = User.build(req.body.user);
     user.setPassword(user.password);
 
     user.save().then(user => {
