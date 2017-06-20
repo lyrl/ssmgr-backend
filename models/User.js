@@ -79,25 +79,4 @@ User.Instance.prototype.validPassword = function(password) {
 
 
 
-
-
-
-// force: true will drop the table if it already exists
-// User.sync({force: true}).then(() => {
-//     // Table created
-//     return User.create({
-//         user_name: 'lyrl',
-//         password: 'abc123',
-//         slat: 'slat',
-//         email: '184387904@qq.com',
-//         status: 0
-//     });
-// });
-
-// User.findAll().then(users => {
-//     console.log(users)
-// })
-
-// module.exports = User;
-
 module.exports = User;
