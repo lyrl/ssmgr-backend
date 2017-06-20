@@ -3,6 +3,7 @@ var Sequelize = require('sequelize');
 const sequelize = new Sequelize('ssmgr', 'root', 'root', {
     host: 'localhost',
     dialect: 'mysql',
+    timezone: 'Asia/Chongqing',
 
     pool: {
         max: 5,

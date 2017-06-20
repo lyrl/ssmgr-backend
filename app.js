@@ -57,12 +57,18 @@ if (!isProduction) {
     res.status(err.status || 500);
 
     if (err.name === 'SequelizeUniqueConstraintError') {
-        res.json({'errors': {
+        return res.json({'errors': {
             message: err.errors[0]['value'] + " 已存在！",
             error: err
         }});
     }
 
+    if (err.name === 'UnauthorizedError') {
+        return res.json({'errors': {
+            message: "非法访问，请登陆后进行操作！",
+            error: err
+        }});
+    }
 
     res.json({'errors': {
       message: err.message,
