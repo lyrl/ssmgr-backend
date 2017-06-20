@@ -55,21 +55,12 @@ router.put('/user', auth.required, function(req, res, next){
     }).catch(next);
 });
 
+/**
+ * 获取所有用户
+ */
 router.get('/users', auth.required, function (req, res, next) {
     logger.info('列出所有用户');
-
-    User.findOne({
-        where: {
-            id: req.payload.id
-        }
-    }).then(user => {
-        if (!user) { return res.status(401).json({
-            errors: {
-                message: "未授权的访问!"
-            }
-        }); }
-    });
-
+    User.findOne({ where: { id: req.payload.id}}).then(user => { if (!user) { return res.status(401).json({ errors: { message: "未授权的访问!"}}); } });
 
     User.findAll().then((users) => {
         return res.json({
