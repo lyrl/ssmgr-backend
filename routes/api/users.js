@@ -70,7 +70,7 @@ router.put('/user', auth.required, function(req, res, next){
     }).then(function(user){
         if(!user){ return res.sendStatus(401); }
 
-        var updateFiled = {};
+        let updateFiled = {};
 
         if(typeof req.body.user.email !== 'undefined'){
             user.email = req.body.user.email;
@@ -127,7 +127,7 @@ router.put('/users/:user_name',auth.required, function (req, res, next) {
                     user.setPassword(req.body.user.password);
 
 
-                    var updateFiled = Object.assign({}, req.body.user, {password: user.password, salt: user.salt});
+                    let updateFiled = Object.assign({}, req.body.user, {password: user.password, salt: user.salt});
 
                     user.update(updateFiled).then(user => {return res.json({user: user})})
                 }else {
