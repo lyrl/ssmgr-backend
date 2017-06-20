@@ -4,6 +4,26 @@ var logger = require('../../component/Logger');
 var auth = require('../auth');
 
 
+
+
+/**
+ * 用户注册
+ */
+router.post('/users', function (req, res, next) {
+    logger.info('用户注册!', req.body.user);
+
+    const user = User.build(req.body.user);
+    user.setPassword(user.password);
+
+    user.save().then(user => {
+        return res.json({user: user.toAuthJSON()});
+    }).catch(next);
+});
+
+
+/**
+ * 获取当前登录用户信息
+ */
 router.get('/user', auth.required, function(req, res, next){
     User.findOne({
         where: {
@@ -47,7 +67,6 @@ router.put('/user', auth.required, function(req, res, next){
             }
         }
 
-
         return user.update(updateFiled).then(function(){
             return res.json({user: user.toAuthJSON()});
         });
@@ -55,12 +74,13 @@ router.put('/user', auth.required, function(req, res, next){
     }).catch(next);
 });
 
+
 /**
  * 获取所有用户
  */
 router.get('/users', auth.required, function (req, res, next) {
     logger.info('列出所有用户');
-    User.findOne({ where: { id: req.payload.id}}).then(user => { if (!user) { return res.status(401).json({ errors: { message: "未授权的访问!"}}); } });
+    User.findById(req.payload.id).then(user => { if (!user) {return  res.status(401).json({ errors: { message: "未授权的访问!"}}) } if (user.id !== 1) {return res.status(403).json({ errors: { message: "您没有权限执行此操作!"}}) } }).catch(next);
 
     User.findAll().then((users) => {
         return res.json({
@@ -69,71 +89,44 @@ router.get('/users', auth.required, function (req, res, next) {
     }).catch(next);
 });
 
+
 /**
- * 用户注册
+ * 修改用户信息
  */
-router.post('/users', function (req, res, next) {
-    logger.info('用户注册!', req.body.user);
-
-    const user = User.build(req.body.user);
-    user.setPassword(user.password);
-
-    user.save().then(user => {
-        return res.json({user: user.toAuthJSON()});
-    }).catch(next);
-});
-
-
-
 router.put('/users/:user_name',auth.required, function (req, res, next) {
     logger.info('修改用户信息 %s!', req.params.user_name, req.body.user);
-
+    User.findById(req.payload.id).then(user => { if (!user) {return  res.status(401).json({ errors: { message: "未授权的访问!"}}) } if (user.id !== 1) {return res.status(403).json({ errors: { message: "您没有权限执行此操作!"}}) } }).catch(next);
 
     User.findOne({
-        where: {
-            user_name: req.params.user_name
-        }
+        where: { user_name: req.params.user_name}
     }).then((user) => {
-        if (user != null) {
-            user.update({
-                email: req.body.user.email
-            }).then(
-                function (user) {
-                    return res.json(user);
-                }
-            )
-        } else {
-            return res.status(404).json({
-                errors: {
-                    message: "用户不存在!"
-                }
-            })
-        }
+        if (user) {
+            user.update(
+                req.body.user
+            ).then(user => {return req.json({user: user})})
+        } else { return res.status(404).json({ errors: { message: "用户不存在!"}}) }
     }).catch(next);
 
 });
 
 
-router.get('/users/:user_name', auth.required, function (req, res, next) {
-    logger.info('按用户名查询 %s!', req.params.user_name);
+/**
+ * 删除用户
+ */
+router.delete('/users/:user_name', auth.required, function (req, res, next) {
+    logger.info('删除用户 %s!', req.params.user_name);
+    User.findById(req.payload.id).then(user => { if (!user) {return  res.status(401).json({ errors: { message: "未授权的访问!"}}) } if (user.id !== 1) {return res.status(403).json({ errors: { message: "您没有权限执行此操作!"}}) } }).catch(next);
 
     User.findOne({
-        where: {
-            user_name: req.params.user_name
-        }
+        where: { user_name: req.params.user_name}
     }).then((user) => {
-
-        if (user == null) {
-            return res.status(404).json({
-                errors : {
-                    message: "Not Found!"
-                }
-            });
+        if (user) {
+            user.destroy().then(success => {
+                return res.sendStatus(200);
+            })
+        } else {
+            return res.status(404).json({ errors: { message: "用户不存在!"}});
         }
-
-        return res.json({
-            'user' : user
-        });
     }).catch(next);
 });
 

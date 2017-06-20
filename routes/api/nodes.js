@@ -10,6 +10,7 @@ var auth = require('../auth');
  */
 router.get('/', auth.required, function (req, res, next) {
     logger.info('查看所有节点');
+    User.findById(req.payload.id).then(user => { if (!user) {return  res.status(401).json({ errors: { message: "未授权的访问!"}}) } if (user.id !== 1) {return res.status(403).json({ errors: { message: "您没有权限执行此操作!"}}) } }).catch(next);
 
     Node.findAll().then(nodes => {
         return res.json({nodes: nodes})
@@ -22,15 +23,10 @@ router.get('/', auth.required, function (req, res, next) {
  */
 router.post('/', auth.required, function (req, res, next) {
     logger.info('增加服务节点 id: %s!', req.params.id, req.body.node);
+    User.findById(req.payload.id).then(user => { if (!user) {return  res.status(401).json({ errors: { message: "未授权的访问!"}}) } if (user.id !== 1) {return res.status(403).json({ errors: { message: "您没有权限执行此操作!"}}) } }).catch(next);
 
-    User.findById(req.payload.id).then(user => {
-        if (!user) {return  res.status(401).json({ errors: { message: "未授权的访问!"}}) }
-
-        if (user.id !== 1) {return res.status(403).json({ errors: { message: "您没有权限执行此操作!"}}) }
-
-        Node.create(req.body.node).then(node => {
-            return res.json({node: node})
-        });
+    Node.create(req.body.node).then(node => {
+        return res.json({node: node})
     }).catch(next);
 });
 
@@ -40,25 +36,20 @@ router.post('/', auth.required, function (req, res, next) {
  */
 router.put('/:nodeid', auth.required, function (req, res, next) {
     logger.info('删除服务节点 productId: %s nodeId: %s!', req.params.productId, req.params.nodeId);
+    User.findById(req.payload.id).then(user => { if (!user) {return  res.status(401).json({ errors: { message: "未授权的访问!"}}) } if (user.id !== 1) {return res.status(403).json({ errors: { message: "您没有权限执行此操作!"}}) } }).catch(next);
 
-    User.findById(req.payload.id).then(user => {
-        if (!user) {return  res.status(401).json({ errors: { message: "未授权的访问!"}}) }
+    Node.findOne({
+        where: {
+            id: req.params.nodeid
+        }
+    }).then(node => {
+        if (!node) {return res.status(404).json({errors: {message: "节点不存在!"}})}
 
-        if (user.id !== 1) {return res.status(403).json({ errors: { message: "您没有权限执行此操作!"}}) }
-
-        Node.findOne({
-            where: {
-                id: req.params.nodeid
-            }
-        }).then(node => {
-            if (!node) {return res.status(404).json({errors: {message: "节点不存在!"}})}
-
-            node.update(req.body.node).then(node => {
-                return res.json({node: {node}})
-            })
-        });
-
+        node.update(req.body.node).then(node => {
+            return res.json({node: {node}})
+        })
     }).catch(next);
+
 });
 
 
@@ -68,25 +59,20 @@ router.put('/:nodeid', auth.required, function (req, res, next) {
  */
 router.delete('/:nodeid', auth.required, function (req, res, next) {
     logger.info('删除服务节点 productId: %s nodeId: %s!', req.params.productId, req.params.nodeId);
+    User.findById(req.payload.id).then(user => { if (!user) {return  res.status(401).json({ errors: { message: "未授权的访问!"}}) } if (user.id !== 1) {return res.status(403).json({ errors: { message: "您没有权限执行此操作!"}}) } }).catch(next);
 
-    User.findById(req.payload.id).then(user => {
-        if (!user) {return  res.status(401).json({ errors: { message: "未授权的访问!"}}) }
+    Node.findOne({
+        where: {
+            id: req.params.nodeid
+        }
+    }).then(node => {
+        if (!node) {return res.status(404).json({errors: {message: "节点不存在!"}})}
 
-        if (user.id !== 1) {return res.status(403).json({ errors: { message: "您没有权限执行此操作!"}}) }
-
-        Node.findOne({
-            where: {
-                id: req.params.nodeid
-            }
-        }).then(node => {
-            if (!node) {return res.status(404).json({errors: {message: "节点不存在!"}})}
-
-            node.destroy().then(success => {
-                return res.sendStatus(200)
-            })
-        });
-
+        node.destroy().then(success => {
+            return res.sendStatus(200)
+        })
     }).catch(next);
+
 });
 
 
