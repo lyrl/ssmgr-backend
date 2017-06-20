@@ -56,6 +56,14 @@ if (!isProduction) {
 
     res.status(err.status || 500);
 
+    if (err.name === 'SequelizeUniqueConstraintError') {
+        res.json({'errors': {
+            message: err.errors[0]['value'] + " 已存在！",
+            error: err
+        }});
+    }
+
+
     res.json({'errors': {
       message: err.message,
       error: err
