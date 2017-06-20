@@ -9,14 +9,34 @@ var auth = require('../auth');
 /**
  * 用户注册
  */
-router.post('/users', function (req, res, next) {
-    logger.info('用户注册!', req.body.user);
+router.post('/users',auth.required, function (req, res, next) {
+    logger.info('添加用户!', req.body.user);
+    User.findById(req.payload.id).then(user => { if (!user) {return  res.status(401).json({ errors: { message: "未授权的访问!"}}) } if (user.id !== 1) {return res.status(403).json({ errors: { message: "您没有权限执行此操作!"}}) } }).catch(next);
 
     const user = User.build(req.body.user);
     user.setPassword(user.password);
 
     user.save().then(user => {
         return res.json({user: user.toAuthJSON()});
+    }).catch(next);
+});
+
+/**
+ * 用户登录
+ */
+router.post('/users/login', function(req, res, next){
+    if(!req.body.user.user_name){ return res.status(422).json({errors: {message: "用户名不能为空！"}}); }
+
+    if(!req.body.user.password){ return res.status(422).json({errors: {message: "密码不能为空！"}}); }
+
+    User.findOne({
+        where: { user_name: req.body.user.user_name}
+    }).then(user => {
+        if (user && user.validPassword(req.body.user.password)) {
+            return res.json({user: user.toAuthJSON()});
+        } else {
+            return res.status(401).json({ errors: { message: "登录失败！用户名或者密码错误!"}});
+        }
     }).catch(next);
 });
 
@@ -50,8 +70,7 @@ router.put('/user', auth.required, function(req, res, next){
     }).then(function(user){
         if(!user){ return res.sendStatus(401); }
 
-        var updateFiled = {};
-
+        let updateFiled = {};
 
         if(typeof req.body.user.email !== 'undefined'){
             user.email = req.body.user.email;
@@ -101,12 +120,26 @@ router.put('/users/:user_name',auth.required, function (req, res, next) {
         where: { user_name: req.params.user_name}
     }).then((user) => {
         if (user) {
-            user.update(
-                req.body.user
-            ).then(user => {return req.json({user: user})})
+            if(typeof req.body.user.password !== 'undefined'){
+                if (req.body.user.password) {
+                    logger.info('原密码 hash %s , salt %s', user.password, user.salt);
+
+                    user.setPassword(req.body.user.password);
+
+
+                    let updateFiled = Object.assign({}, req.body.user, {password: user.password, salt: user.salt});
+
+                    user.update(updateFiled).then(user => {return res.json({user: user})})
+                }else {
+                    logger.info('原密码 hash %s , salt %s', user.password, user.salt);
+                    user.update(req.body.user).then(user => {return res.json({user: user})})
+                }
+            } else {
+                logger.info('原密码 hash %s , salt %s', user.password, user.salt);
+                user.update(req.body.user).then(user => {return res.json({user: user})})
+            }
         } else { return res.status(404).json({ errors: { message: "用户不存在!"}}) }
     }).catch(next);
-
 });
 
 
@@ -145,32 +178,6 @@ router.delete('/users/:user_name', auth.required, function (req, res, next) {
     }).catch(next);
 });
 
-
-router.post('/users/login', function(req, res, next){
-    if(!req.body.user.user_name){
-        return res.status(422).json({errors: {message: "user_name can't be blank"}});
-    }
-
-    if(!req.body.user.password){
-        return res.status(422).json({errors: {message: "password can't be blank"}});
-    }
-
-    User.findOne({
-        where: {
-            user_name: req.body.user.user_name
-        }
-    }).then(user => {
-        if (user && user.validPassword(req.body.user.password)) {
-            return res.json({user: user.toAuthJSON()});
-        } else {
-            return res.status(401).json({
-                errors: {
-                    message: "登录失败！用户名或者密码错误!"
-                }
-            });
-        }
-    }).catch(next);
-});
 
 
 
