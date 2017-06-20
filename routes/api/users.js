@@ -70,7 +70,7 @@ router.put('/user', auth.required, function(req, res, next){
     }).then(function(user){
         if(!user){ return res.sendStatus(401); }
 
-        let updateFiled = {};
+        var updateFiled = {};
 
         if(typeof req.body.user.email !== 'undefined'){
             user.email = req.body.user.email;
