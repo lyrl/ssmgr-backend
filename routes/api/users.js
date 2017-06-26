@@ -144,13 +144,12 @@ router.put('/users/:user_name',auth.required, function (req, res, next) {
 
                     user.setPassword(req.body.user.password);
 
-
                     let updateFiled = Object.assign({}, req.body.user, {password: user.password, salt: user.salt});
 
                     user.update(updateFiled).then(user => {return res.json({user: user})})
                 }else {
                     logger.info('原密码 hash %s , salt %s', user.password, user.salt);
-                    user.update(req.body.user).then(user => {return res.json({user: user})})
+                    return res.status(400).json({ errors: { message: "密码不能为空!"}})
                 }
             } else {
                 logger.info('原密码 hash %s , salt %s', user.password, user.salt);
