@@ -110,7 +110,8 @@ router.get('/users', auth.required, function (req, res, next) {
 
 
 /**
- * 获取所有用户
+ * 获取用户信息
+ *  根据用户名查询
  */
 router.get('/users/:user_name', auth.required, function (req, res, next) {
   logger.info('查询用户信息 %s!', req.params.user_name);
