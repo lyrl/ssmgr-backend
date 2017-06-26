@@ -110,6 +110,23 @@ router.get('/users', auth.required, function (req, res, next) {
 
 
 /**
+ * 获取所有用户
+ */
+router.get('/users/:user_name', auth.required, function (req, res, next) {
+  logger.info('查询用户信息 %s!', req.params.user_name);
+  User.findById(req.payload.id).then(user => { if (!user) {return  res.status(401).json({ errors: { message: "未授权的访问!"}}) } if (user.id !== 1) {return res.status(403).json({ errors: { message: "您没有权限执行此操作!"}}) } }).catch(next);
+
+  User.findOne({where: { user_name: req.params.user_name}}).then((user) => {
+    if (user) {
+      return res.json({ 'user': user});
+    }
+
+    return res.status(404).json({ errors: { message: "用户不存在!"}})
+  }).catch(next);
+});
+
+
+/**
  * 修改用户信息
  */
 router.put('/users/:user_name',auth.required, function (req, res, next) {
