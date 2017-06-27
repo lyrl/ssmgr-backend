@@ -26,6 +26,10 @@ const Node = sequelize.define('node', {
     node_encry_mode: {
         type: Sequelize.STRING(24),
         allowNull: false
+    },
+    max_user: {
+        type: Sequelize.INTEGER,
+        allowNull: false
     }
 },
 {
