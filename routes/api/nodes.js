@@ -55,7 +55,7 @@ router.put('/:nodeid', auth.required, function (req, res, next) {
 /**
  * 获取节点信息
  */
-router.put('/:nodeid', auth.required, function (req, res, next) {
+router.get('/:nodeid', auth.required, function (req, res, next) {
   logger.info('获取节点信息  nodeId: %s!', req.params.nodeid);
   User.findById(req.payload.id).then(user => { if (!user) {return  res.status(401).json({ errors: { message: "未授权的访问!"}}) } if (user.id !== 1) {return res.status(403).json({ errors: { message: "您没有权限执行此操作!"}}) } }).catch(next);
 
