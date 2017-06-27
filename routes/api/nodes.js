@@ -16,7 +16,7 @@ router.get('/', auth.required, function (req, res, next) {
       Node.findAll({
         include: [{
           model: User,
-          attributes: [[sequelize.fn('COUNT', 'Users.id'), 'userCount']]
+          attributes: [[sequelize.fn('COUNT', 'users.id'), 'userCount']]
         }],
         group:['node.id'],
       }).then(nodes => {
