@@ -18,7 +18,7 @@ router.get('/', auth.required, function (req, res, next) {
           model: User,
           attributes: [[sequelize.fn('COUNT', 'Users.id'), 'userCount']]
         }],
-        group:['Node.id'],
+        group:['id'],
       }).then(nodes => {
         return res.json({nodes: nodes})
       }).catch(next);
