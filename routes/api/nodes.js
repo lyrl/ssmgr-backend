@@ -22,7 +22,7 @@ router.get('/', auth.required, function (req, res, next) {
  * 增加节点
  */
 router.post('/', auth.required, function (req, res, next) {
-    logger.info('增加服务节点 id: %s!', req.params.id, req.body.node);
+    logger.info('增加服务节点 %s!', req.body.node);
     User.findById(req.payload.id).then(user => { if (!user) {return  res.status(401).json({ errors: { message: "未授权的访问!"}}) } if (user.id !== 1) {return res.status(403).json({ errors: { message: "您没有权限执行此操作!"}}) } }).catch(next);
 
     Node.create(req.body.node).then(node => {
@@ -35,7 +35,7 @@ router.post('/', auth.required, function (req, res, next) {
  * 修改节点接口
  */
 router.put('/:nodeid', auth.required, function (req, res, next) {
-    logger.info('删除服务节点 productId: %s nodeId: %s!', req.params.productId, req.params.nodeId);
+  logger.info('修改节点信息  nodeId: %s!', req.params.nodeid);
     User.findById(req.payload.id).then(user => { if (!user) {return  res.status(401).json({ errors: { message: "未授权的访问!"}}) } if (user.id !== 1) {return res.status(403).json({ errors: { message: "您没有权限执行此操作!"}}) } }).catch(next);
 
     Node.findOne({
@@ -52,13 +52,34 @@ router.put('/:nodeid', auth.required, function (req, res, next) {
 
 });
 
+/**
+ * 获取节点信息
+ */
+router.put('/:nodeid', auth.required, function (req, res, next) {
+  logger.info('获取节点信息  nodeId: %s!', req.params.nodeid);
+  User.findById(req.payload.id).then(user => { if (!user) {return  res.status(401).json({ errors: { message: "未授权的访问!"}}) } if (user.id !== 1) {return res.status(403).json({ errors: { message: "您没有权限执行此操作!"}}) } }).catch(next);
+
+  Node.findOne({
+    where: {
+      id: req.params.nodeid
+    }
+  }).then(node => {
+    if (!node) {return res.status(404).json({errors: {message: "节点不存在!"}})}
+
+    node.update(req.body.node).then(node => {
+      return res.json({node: {node}})
+    })
+  }).catch(next);
+
+});
+
 
 
 /**
  * 删除产品节点
  */
 router.delete('/:nodeid', auth.required, function (req, res, next) {
-    logger.info('删除服务节点 productId: %s nodeId: %s!', req.params.productId, req.params.nodeId);
+  logger.info('删除节点信息  nodeId: %s!', req.params.nodeid);
     User.findById(req.payload.id).then(user => { if (!user) {return  res.status(401).json({ errors: { message: "未授权的访问!"}}) } if (user.id !== 1) {return res.status(403).json({ errors: { message: "您没有权限执行此操作!"}}) } }).catch(next);
 
     Node.findOne({
