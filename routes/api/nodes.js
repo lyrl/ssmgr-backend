@@ -13,13 +13,8 @@ router.get('/', auth.required, function (req, res, next) {
     User.findById(req.payload.id).then(user => { if (!user) {return  res.status(401).json({ errors: { message: "未授权的访问!"}}) } if (user.id !== 1) {return res.status(403).json({ errors: { message: "您没有权限执行此操作!"}}) } }).catch(next);
 
     if (req.query.countUser) {
-      Node.findAll({
-        include: [{
-          model: User,
-          attributes: [[sequelize.fn('COUNT', 'users.id'), 'userCount']]
-        }],
-        group:['node.id'],
-      }).then(nodes => {
+      sequelize.query('SELECT `node`.`id`, `node`.`node_name`, `node`.`node_ip`, `node`.`node_port`, `node`.`node_key`, `node`.`node_encry_mode`, `node`.`created_at`, `node`.`updated_at`, `node`.`deleted_at`, (SELECT COUNT(1) FROM `t_user_node` AS `tun` WHERE tun.deleted_at IS NULL AND tun.node_id = node.id) AS `user_count` FROM `t_node` AS `node` WHERE `node`.`deleted_at` IS NULL')
+          .then(nodes => {
         return res.json({nodes: nodes})
       }).catch(next);
     } else {
