@@ -1,20 +1,33 @@
 var router = require('express').Router();
 var User = require('../../models/User');
-var {Node} = require('../../models/Node');
+var {Node, UserNodes} = require('../../models/Node');
 var logger = require('../../component/Logger');
 var auth = require('../auth');
-
+var sequelize = require('../../models/DatabaseConnection');
 
 /**
  * 获取产品下所有节点
  */
 router.get('/', auth.required, function (req, res, next) {
-    logger.info('查看所有节点');
+    logger.info('查看所有节点 countUser = %s', req.query.countUser ? 'true' : 'false' );
     User.findById(req.payload.id).then(user => { if (!user) {return  res.status(401).json({ errors: { message: "未授权的访问!"}}) } if (user.id !== 1) {return res.status(403).json({ errors: { message: "您没有权限执行此操作!"}}) } }).catch(next);
 
-    Node.findAll().then(nodes => {
+    if (req.query.countUser) {
+      Node.findAll({
+        include: [{
+          model: User,
+          attributes: [[sequelize.fn('COUNT', 'Users.id'), 'userCount']]
+        }],
+        group:['Node.id'],
+      }).then(nodes => {
         return res.json({nodes: nodes})
-    }).catch(next);
+      }).catch(next);
+    } else {
+      Node.findAll({
+      }).then(nodes => {
+        return res.json({nodes: nodes})
+      }).catch(next);
+    }
 });
 
 
