@@ -66,9 +66,7 @@ router.get('/:nodeid', auth.required, function (req, res, next) {
   }).then(node => {
     if (!node) {return res.status(404).json({errors: {message: "节点不存在!"}})}
 
-    node.update(req.body.node).then(node => {
-      return res.json({node: {node}})
-    })
+    return res.json({node: node});
   }).catch(next);
 
 });
