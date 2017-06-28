@@ -80,6 +80,30 @@ router.get('/:nodeid', auth.required, function (req, res, next) {
 });
 
 
+/**
+ * 获取节点下用户信息
+ */
+router.get('/:nodeid/users', auth.required, function (req, res, next) {
+  logger.info('获取节点下用户信息  nodeId: %s!', req.params.nodeid);
+  User.findById(req.payload.id).then(user => { if (!user) {return  res.status(401).json({ errors: { message: "未授权的访问!"}}) } if (user.id !== 1) {return res.status(403).json({ errors: { message: "您没有权限执行此操作!"}}) } }).catch(next);
+
+  Node.findOne({
+    where: {
+      id: req.params.nodeid
+    },
+    include: {
+      model: User
+    }
+  }).then(node => {
+    if (!node) {return res.status(404).json({errors: {message: "节点不存在!"}})}
+
+    return res.json({node: node});
+  }).catch(next);
+
+});
+
+
+
 
 /**
  * 删除产品节点
