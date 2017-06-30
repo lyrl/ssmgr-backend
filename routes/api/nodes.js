@@ -102,6 +102,37 @@ router.get('/:nodeid/users', auth.required, function (req, res, next) {
 
 });
 
+/**
+ * 增加节点用户
+ */
+router.post('/:nodeid/users', auth.required, function (req, res, next) {
+  logger.info('增加节点用户  nodeId: %s!', req.params.nodeid);
+  User.findById(req.payload.id).then(user => { if (!user) {return  res.status(401).json({ errors: { message: "未授权的访问!"}}) } if (user.id !== 1) {return res.status(403).json({ errors: { message: "您没有权限执行此操作!"}}) } }).catch(next);
+
+  Node.findOne({
+    where: {
+      id: req.params.nodeid
+    }
+  }).then(node => {
+    if (!node) {return res.status(404).json({errors: {message: "节点不存在!"}})}
+
+    let nodeuser = req.body.nodeuser;
+
+    User.findOne({ where: { user_name: nodeuser.user}}).then(user => {
+      if (user) {
+        user.userNodes = { method: nodeuser.method, password: nodeuser.password,};
+
+        node.addUser(user).then((nu)=> {
+          return res.json(nu);
+        })
+      } else {
+        if (!user) {return res.status(404).json({errors: {message: "用户不存在!"}})}
+      }
+    });
+  }).catch(next);
+
+});
+
 
 
 
