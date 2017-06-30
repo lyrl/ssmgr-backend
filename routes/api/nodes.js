@@ -134,6 +134,46 @@ router.post('/:nodeid/users', auth.required, function (req, res, next) {
 });
 
 
+/**
+ * 删除节点用户
+ */
+router.delete('/:nodeid/users/:userid', auth.required, function (req, res, next) {
+  logger.info('删除节点用户  nodeid: %s userid: %s!', req.params.nodeid, req.params.userid);
+  User.findById(req.payload.id).then(user => { if (!user) {return  res.status(401).json({ errors: { message: "未授权的访问!"}}) } if (user.id !== 1) {return res.status(403).json({ errors: { message: "您没有权限执行此操作!"}}) } }).catch(next);
+
+  Node.findOne({
+    include: [
+      {
+        model: User,
+        through: {
+          where: {
+            user_id: req.params.userid
+          }
+        }
+      }
+    ],
+    where: {
+      id: req.params.nodeid
+    }
+  }).then(node => {
+
+    if (node) {
+      if (node.users && node.users.length) {
+        node.removeUser(node.users[0]).then(() => {
+          return res.json(node);
+        });
+      } else {
+        return res.status(404).json({errors: {message: "用户不存在于这个节点下!"}});
+      }
+    } else {
+      return res.status(404).json({errors: {message: "节点不存在!"}});
+    }
+
+  }).catch(next);
+
+});
+
+
 
 
 /**
