@@ -53,4 +53,27 @@ router.post('/traffics', function (req, res, next) {
 
 
 
+/**
+* 用户列表
+*/
+router.get('/node/users/:security_key', function (req, res, next) {
+  logger.info('获取节点下已有用户列表!');
+
+  let securityKey = req.params.security_key;
+
+  Node.findOne({where: {
+    node_key: securityKey
+  },
+    include: {
+      model: User
+    }
+  }).then(node => {
+    if (!node) {return res.status(404).json({errors: {message: "节点不存在!"}})}
+
+    return res.json(node);
+  }).catch(next);
+});
+
+
+
 module.exports = router;
