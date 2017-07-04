@@ -4,6 +4,8 @@ const {Node, UserNodes} = require('../../models/Node');
 const logger = require('../../component/Logger');
 const auth = require('../auth');
 const sequelize = require('../../models/DatabaseConnection');
+const {post} = require('../../component/HttpUtil');
+
 
 /**
  * 获取产品下所有节点
@@ -120,17 +122,30 @@ router.post('/:nodeid/users', auth.required, function (req, res, next) {
 
     User.findOne({ where: { user_name: nodeuser.user}}).then(user => {
       if (user) {
-        user.userNodes = { method: nodeuser.method, password: nodeuser.password,};
-
-        node.addUser(user).then((nu)=> {
-
-          let node_ip = node.node_ip;
-          let node_port = node.node_port;
-          let node_key = node.node_key;
+        let node_ip = node.node_ip;
+        let node_port = node.node_port;
+        let node_key = node.node_key;
 
 
-          return res.json(nu);
-        })
+        let url = `http://${node_ip}:${node_port}/api/users`;
+
+        post(url, { "user": { "username": user.user_name, "password": nodeuser.password, "method": nodeuser.method},}, node_key)
+            .then(function (body) {
+              logger.info('Http POST 请求成功！ 返回: %s', JSON.stringify(body));
+              user.userNodes = { method: nodeuser.method, password: nodeuser.password, port: body.user.server_port, status: 'working'};
+
+              node.addUser(user).then((nu)=> {
+                return res.json(nu);
+              })})
+            .catch(function (err) {
+              logger.error('Http POST 请求失败！ 返回: %s %s', err.statusCode,  err.message);
+              user.userNodes = { method: nodeuser.method, password: nodeuser.password};
+              node.addUser(user).then((nu)=> {
+                return res.json(nu);
+              })
+            });
+
+
       } else {
         if (!user) {return res.status(404).json({errors: {message: "用户不存在!"}})}
       }

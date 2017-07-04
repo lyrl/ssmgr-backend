@@ -9,7 +9,7 @@ const sequelize = require('../../models/DatabaseConnection');
  * 流量上报
  */
 router.post('/traffics', function (req, res, next) {
-    logger.info('流量上报 数据 %s', req.body.data);
+    logger.info('流量上报 数据 %s', JSON.stringify(req.body.data));
 
     let securityKey = req.body.data.security_key;
     let traffics = req.body.data.traffics;
