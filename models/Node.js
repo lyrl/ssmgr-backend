@@ -41,6 +41,7 @@ const Node = sequelize.define('node', {
 }
 );
 
+
 // many to many
 const UserNodes = sequelize.define('userNodes', {
     id: {
@@ -64,5 +65,6 @@ const UserNodes = sequelize.define('userNodes', {
 
 Node.belongsToMany(User, {through: UserNodes, constraints: false});
 User.belongsToMany(Node, {through: UserNodes, constraints: false});
+
 
 module.exports = {Node, UserNodes};

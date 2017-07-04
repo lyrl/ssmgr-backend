@@ -1,9 +1,9 @@
-var router = require('express').Router();
-var User = require('../../models/User');
-var {Node, UserNodes} = require('../../models/Node');
-var logger = require('../../component/Logger');
-var auth = require('../auth');
-var sequelize = require('../../models/DatabaseConnection');
+const router = require('express').Router();
+const User = require('../../models/User');
+const {Node, UserNodes} = require('../../models/Node');
+const logger = require('../../component/Logger');
+const auth = require('../auth');
+const sequelize = require('../../models/DatabaseConnection');
 
 /**
  * 获取产品下所有节点
@@ -123,6 +123,12 @@ router.post('/:nodeid/users', auth.required, function (req, res, next) {
         user.userNodes = { method: nodeuser.method, password: nodeuser.password,};
 
         node.addUser(user).then((nu)=> {
+
+          let node_ip = node.node_ip;
+          let node_port = node.node_port;
+          let node_key = node.node_key;
+
+
           return res.json(nu);
         })
       } else {
