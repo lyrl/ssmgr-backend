@@ -46,7 +46,7 @@ router.post('/traffics', function (req, res, next) {
 
       node.save();
 
-      node.update({updatedAt: new Date()}).then(()=> {
+      node.update({updatedAt: null}).then(()=> {
         return res.sendStatus(200);
       });
     }).catch(next);
