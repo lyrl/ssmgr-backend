@@ -213,13 +213,13 @@ router.get('/:nodeid/users/:userid/suspend', auth.required, function (req, res, 
 
         let url = `http://${node_ip}:${node_port}/api/users/${user.user_name}`;
 
-        del(url, node_key).then( res => {
-          logger.error('暂停节点用户服务 请求成功 ');
+        del(url, node_key).then( r => {
+          logger.info('暂停节点用户服务 请求成功 ');
 
           user.userNodes.update({
             status: 'suspend'
           }).then(s => {
-            logger.error('暂停节点用户服务 状态修改成功! ');
+            logger.info('暂停节点用户服务 状态修改成功! ');
             return res.sendStatus(200);
           });
         }).catch(err => {
