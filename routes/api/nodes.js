@@ -269,12 +269,17 @@ router.get('/:nodeid/users/:userid/sync', auth.required, function (req, res, nex
             .then(function (body) {
               logger.info('Http POST 请求成功！ 返回: %s', JSON.stringify(body));
 
-              user.userNodes.update({
-                status: 'working',
-                port: body.user.server_port
-              }).then(s => {
-                  return res.sendStatus(200);
-              })})
+              // 失败
+              if (body.errors) {
+                logger.info('Http POST 请求成功！ 错误信息: %s', body.errors.message);
+                return res.status(400).json({errors: body.errors});
+              } else {
+                user.userNodes.update({ status: 'working', port: body.user.server_port})
+                    .then(s => { return res.sendStatus(200); });
+                return res.sendStatus(200);
+              }
+
+            })
             .catch(function (err) {
               logger.error('Http POST 请求失败！ 返回: %s %s', err.statusCode,  err.message);
               return res.json(err.body);
