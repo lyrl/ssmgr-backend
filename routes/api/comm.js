@@ -14,7 +14,6 @@ router.post('/traffics', function (req, res, next) {
     let securityKey = req.body.data.security_key;
     let traffics = req.body.data.traffics;
 
-
     Node.findOne({where: {
       node_key: securityKey
     }}).then(node => {
@@ -45,7 +44,11 @@ router.post('/traffics', function (req, res, next) {
         });
       });
 
-      return res.sendStatus(200)
+      node.update({
+        updated_at: new Date()
+      }).then(up => {
+        return res.sendStatus(200)
+      });
 
     }).catch(next);
 });
