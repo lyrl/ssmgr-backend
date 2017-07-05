@@ -44,12 +44,8 @@ router.post('/traffics', function (req, res, next) {
         });
       });
 
-      node.update({
-        updated_at: new Date()
-      }).then(up => {
-        return res.sendStatus(200)
-      });
-
+      node.changed('updatedAt', true);
+      return res.sendStatus(200)
     }).catch(next);
 });
 
