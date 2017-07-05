@@ -275,10 +275,7 @@ router.get('/:nodeid/users/:userid/sync', auth.required, function (req, res, nex
               })})
             .catch(function (err) {
               logger.error('Http POST 请求失败！ 返回: %s %s', err.statusCode,  err.message);
-              user.userNodes = { method: nodeuser.method, password: nodeuser.password};
-              node.addUser(user).then((nu)=> {
-                return res.json(nu);
-              })
+              return res.json(err.body);
             });
       } else {
         return res.status(404).json({errors: {message: "用户不存在于这个节点下!"}});
