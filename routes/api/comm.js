@@ -44,11 +44,11 @@ router.post('/traffics', function (req, res, next) {
         });
       });
 
-      node.save();
-
-      node.update({updatedAt: null}).then(()=> {
+      node.set('updatedAt', new Date());
+      node.save().then(function () {
         return res.sendStatus(200);
       });
+
     }).catch(next);
 });
 
