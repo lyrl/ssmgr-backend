@@ -45,7 +45,7 @@ router.post('/traffics', function (req, res, next) {
       });
 
       logger.info("更新节点最后心跳时间");
-      node.set('updatedAt', new Date());
+      node.set('updated_at', new Date());
       node.save().then(function () {
         return res.sendStatus(200);
       });
