@@ -265,8 +265,10 @@ router.get('/:nodeid/users/:userid/sync', auth.required, function (req, res, nex
 
         let url = `http://${node_ip}:${node_port}/api/users`;
 
-        post(url, { "user": { "username": user.user_name, port: user.userNodes.port, "password": user.userNodes.password, "method": user.userNodes.method},}, node_key)
-            .then(function (body) {
+        post(url,
+            { "user": { "username": user.user_name, port: user.userNodes.port, "password": user.userNodes.password, "method": user.userNodes.method}},
+            node_key
+        ).then(body => {
               logger.info('Http POST 请求成功！ 返回: %s', JSON.stringify(body));
 
               // 失败
@@ -278,8 +280,7 @@ router.get('/:nodeid/users/:userid/sync', auth.required, function (req, res, nex
                     .then(s => { return res.sendStatus(200); });
                 return res.sendStatus(200);
               }
-            })
-            .catch(function (err) {
+            }).catch(err => {
               logger.error('Http POST 请求失败！ 返回: %s %s', err.statusCode,  err.message);
               return res.json(err.body);
             });
