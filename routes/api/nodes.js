@@ -191,7 +191,7 @@ router.delete('/:nodeid/users/:userid', auth.required, function (req, res, next)
 /**
  * 暂停节点用户服务
  */
-router.delete('/:nodeid/users/:userid/suspend', auth.required, function (req, res, next) {
+router.get('/:nodeid/users/:userid/suspend', auth.required, function (req, res, next) {
   logger.info('暂停节点用户服务  nodeid: %s userid: %s!', req.params.nodeid, req.params.userid);
   User.findById(req.payload.id).then(user => { if (!user) {return  res.status(401).json({ errors: { message: "未授权的访问!"}}) } if (user.id !== 1) {return res.status(403).json({ errors: { message: "您没有权限执行此操作!"}}) } }).catch(next);
 
@@ -242,7 +242,7 @@ router.delete('/:nodeid/users/:userid/suspend', auth.required, function (req, re
 /**
  * 同步用户到服务节点
  */
-router.sync('/:nodeid/users/:userid/sync', auth.required, function (req, res, next) {
+router.get('/:nodeid/users/:userid/sync', auth.required, function (req, res, next) {
   logger.info('同步用户到服务节点  nodeid: %s userid: %s!', req.params.nodeid, req.params.userid);
   User.findById(req.payload.id).then(user => { if (!user) {return  res.status(401).json({ errors: { message: "未授权的访问!"}}) } if (user.id !== 1) {return res.status(403).json({ errors: { message: "您没有权限执行此操作!"}}) } }).catch(next);
 
