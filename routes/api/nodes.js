@@ -4,7 +4,7 @@ const {Node, UserNodes} = require('../../models/Node');
 const logger = require('../../component/Logger');
 const auth = require('../auth');
 const sequelize = require('../../models/DatabaseConnection');
-const {post} = require('../../component/HttpUtil');
+const {post, del} = require('../../component/HttpUtil');
 
 
 /**
@@ -164,14 +164,7 @@ router.delete('/:nodeid/users/:userid', auth.required, function (req, res, next)
 
   Node.findOne({
     include: [
-      {
-        model: User,
-        through: {
-          where: {
-            user_id: req.params.userid
-          }
-        }
-      }
+      {model: User, through: { where: { user_id: req.params.userid}} }
     ],
     where: {
       id: req.params.nodeid
@@ -195,10 +188,113 @@ router.delete('/:nodeid/users/:userid', auth.required, function (req, res, next)
 });
 
 
+/**
+ * 暂停节点用户服务
+ */
+router.delete('/:nodeid/users/:userid/suspend', auth.required, function (req, res, next) {
+  logger.info('暂停节点用户服务  nodeid: %s userid: %s!', req.params.nodeid, req.params.userid);
+  User.findById(req.payload.id).then(user => { if (!user) {return  res.status(401).json({ errors: { message: "未授权的访问!"}}) } if (user.id !== 1) {return res.status(403).json({ errors: { message: "您没有权限执行此操作!"}}) } }).catch(next);
+
+  Node.findOne({
+    include: [
+      {model: User, through: { where: { user_id: req.params.userid}} }
+    ],
+    where: {
+      id: req.params.nodeid
+    }
+  }).then(node => {
+
+    if (node) {
+      if (node.users && node.users.length) {
+        let user = node.users[0];
+        let node_ip = node.node_ip;
+        let node_port = node.node_port;
+        let node_key = node.node_key;
+
+        let url = `http://${node_ip}:${node_port}/api/users/${user.user_name}`;
+
+        del(url, node_key).then( res => {
+          logger.error('暂停节点用户服务 请求成功 ');
+
+          user.userNodes.update({
+            status: 'suspend'
+          }).then(s => {
+            logger.error('暂停节点用户服务 状态修改成功! ');
+            return res.sendStatus(200);
+          });
+        }).catch(err => {
+          logger.error('暂停节点用户服务 请求失败 %s', JSON.stringify(err));
+          return res.sendStatus(500);
+        })
+
+      } else {
+        return res.status(404).json({errors: {message: "用户不存在于这个节点下!"}});
+      }
+    } else {
+      return res.status(404).json({errors: {message: "节点不存在!"}});
+    }
+
+  }).catch(next);
+
+});
 
 
 /**
- * 删除产品节点
+ * 同步用户到服务节点
+ */
+router.sync('/:nodeid/users/:userid/sync', auth.required, function (req, res, next) {
+  logger.info('同步用户到服务节点  nodeid: %s userid: %s!', req.params.nodeid, req.params.userid);
+  User.findById(req.payload.id).then(user => { if (!user) {return  res.status(401).json({ errors: { message: "未授权的访问!"}}) } if (user.id !== 1) {return res.status(403).json({ errors: { message: "您没有权限执行此操作!"}}) } }).catch(next);
+
+  Node.findOne({
+    include: [
+      {model: User, through: { where: { user_id: req.params.userid}} }
+    ],
+    where: {
+      id: req.params.nodeid
+    }
+  }).then(node => {
+
+    if (node) {
+      if (node.users && node.users.length) {
+        let user = node.users[0];
+        let node_ip = node.node_ip;
+        let node_port = node.node_port;
+        let node_key = node.node_key;
+
+
+        let url = `http://${node_ip}:${node_port}/api/users`;
+
+        post(url, { "user": { "username": user.user_name, port: user.userNodes.port, "password": user.userNodes.password, "method": user.userNodes.method},}, node_key)
+            .then(function (body) {
+              logger.info('Http POST 请求成功！ 返回: %s', JSON.stringify(body));
+              user.userNodes.update({
+                status: 'working'
+              }).then(s => {
+                  return res.sendStatus(200);
+              })})
+            .catch(function (err) {
+              logger.error('Http POST 请求失败！ 返回: %s %s', err.statusCode,  err.message);
+              user.userNodes = { method: nodeuser.method, password: nodeuser.password};
+              node.addUser(user).then((nu)=> {
+                return res.json(nu);
+              })
+            });
+      } else {
+        return res.status(404).json({errors: {message: "用户不存在于这个节点下!"}});
+      }
+    } else {
+      return res.status(404).json({errors: {message: "节点不存在!"}});
+    }
+
+  }).catch(next);
+
+});
+
+
+
+/**
+ * 删除节点
  */
 router.delete('/:nodeid', auth.required, function (req, res, next) {
   logger.info('删除节点信息  nodeId: %s!', req.params.nodeid);

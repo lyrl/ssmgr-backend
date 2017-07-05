@@ -21,7 +21,23 @@ function post(url, data, securityKey) {
 }
 
 
-module.exports = {post};
+function del(url, securityKey) {
+  logger.info('Http DELETE 发起请求到 %s 数据 %s', url);
+
+
+  let options = {
+    method: 'DELETE',
+    uri: url,
+    headers: {
+      'Authorization': securityKey
+    }
+  };
+
+  return rp(options);
+}
+
+
+module.exports = {post, del};
 
 // post('http://127.0.0.1:9999/api/users', {
 //   "user":{
