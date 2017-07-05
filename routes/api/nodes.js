@@ -268,8 +268,10 @@ router.get('/:nodeid/users/:userid/sync', auth.required, function (req, res, nex
         post(url, { "user": { "username": user.user_name, port: user.userNodes.port, "password": user.userNodes.password, "method": user.userNodes.method},}, node_key)
             .then(function (body) {
               logger.info('Http POST 请求成功！ 返回: %s', JSON.stringify(body));
+
               user.userNodes.update({
-                status: 'working'
+                status: 'working',
+                port: body.user.server_port
               }).then(s => {
                   return res.sendStatus(200);
               })})
