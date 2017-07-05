@@ -278,7 +278,6 @@ router.get('/:nodeid/users/:userid/sync', auth.required, function (req, res, nex
                     .then(s => { return res.sendStatus(200); });
                 return res.sendStatus(200);
               }
-
             })
             .catch(function (err) {
               logger.error('Http POST 请求失败！ 返回: %s %s', err.statusCode,  err.message);
