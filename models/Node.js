@@ -30,6 +30,10 @@ const Node = sequelize.define('node', {
     max_user: {
         type: Sequelize.INTEGER,
         allowNull: false
+    },
+    last_heartbeat: {
+        type: Sequelize.DATE,
+        allowNull: true
     }
 },
 {

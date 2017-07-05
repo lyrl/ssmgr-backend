@@ -45,8 +45,10 @@ router.post('/traffics', function (req, res, next) {
       });
 
       logger.info("更新节点最后心跳时间");
-      node.set('updated_at', new Date());
-      node.save().then(function () {
+
+      node.update({
+        last_heartbeat: new Date()
+      }).then(n => {
         return res.sendStatus(200);
       });
 
