@@ -79,6 +79,17 @@ router.get('/node/users/:security_key', function (req, res, next) {
   }).catch(next);
 });
 
+// 主页仪表盘
+router.get('/statistics',  auth.required, function (req, res, next)
+{
+  logger.info('主页仪表盘数据');
+  User.findById(req.payload.id).then(user => { if (!user) {return  res.status(401).json({ errors: { message: "未授权的访问!"}}) } if (user.id !== 1) {return res.status(403).json({ errors: { message: "您没有权限执行此操作!"}}) } }).catch(next);
+
+  sequelize.query('SELECT (SELECT COUNT(u.`id`) AS users FROM `t_user` u WHERE u.`deleted_at` IS NULL) AS users, (SELECT COUNT(n.`id`) AS nodes FROM `t_node` n WHERE n.`deleted_at` IS NULL) AS nodes').then(result => {
+    return res.json(result);
+  });
+
+});
 
 
 module.exports = router;
