@@ -35,9 +35,21 @@ router.post('/', auth.required, function (req, res, next) {
     logger.info('增加服务节点 %s!', req.body.node);
     User.findById(req.payload.id).then(user => { if (!user) {return  res.status(401).json({ errors: { message: "未授权的访问!"}}) } if (user.id !== 1) {return res.status(403).json({ errors: { message: "您没有权限执行此操作!"}}) } }).catch(next);
 
-    Node.create(req.body.node).then(node => {
-        return res.json({node: node})
-    }).catch(next);
+    Node.findAll({
+      where: {
+        node_key: req.node.node_key
+      }
+    }).then(nodes => {
+      if (nodes) {
+        return res.status(400).json({errors: {message: "节点通讯密钥不能重复!"}});
+      } else {
+        Node.create(req.body.node).then(node => {
+          return res.json({node: node})
+        }).catch(next);
+      }
+    });
+
+
 });
 
 
