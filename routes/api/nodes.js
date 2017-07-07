@@ -40,7 +40,7 @@ router.post('/', auth.required, function (req, res, next) {
         node_key: req.body.node.node_key
       }
     }).then(nodes => {
-      if (nodes) {
+      if (nodes && nodes.length) {
         return res.status(400).json({errors: {message: "节点通讯密钥不能重复!"}});
       } else {
         Node.create(req.body.node).then(node => {
@@ -75,7 +75,7 @@ router.put('/:nodeid', auth.required, function (req, res, next) {
             }
           }
         }).then(nodes => {
-          if (nodes) {
+          if (nodes && nodes.length) {
             return res.status(400).json({errors: {message: "节点通讯密钥不能重复!"}});
           } else {
             node.update(req.body.node).then(node => {
