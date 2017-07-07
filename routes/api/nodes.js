@@ -4,7 +4,7 @@ const {Node, UserNodes} = require('../../models/Node');
 const logger = require('../../component/Logger');
 const auth = require('../auth');
 const sequelize = require('../../models/DatabaseConnection');
-const {post, del} = require('../../component/HttpUtil');
+const {post, del, get} = require('../../component/HttpUtil');
 
 
 /**
@@ -132,17 +132,22 @@ router.post('/:nodeid/users', auth.required, function (req, res, next) {
         post(url, { "user": { "username": user.user_name, "password": nodeuser.password, "method": nodeuser.method},}, node_key)
             .then(function (body) {
               logger.info('Http POST 请求成功！ 返回: %s', JSON.stringify(body));
-              user.userNodes = { method: nodeuser.method, password: nodeuser.password, port: body.user.server_port, status: 'working'};
 
-              node.addUser(user).then((nu)=> {
-                return res.json(nu);
-              })})
+              if (body.errors) {
+                user.userNodes = { method: nodeuser.method, password: nodeuser.password, status: 'wait_for_sync'};
+                node.addUser(user).then((nu)=> {
+                  return res.json(nu);
+                });
+              } else {
+                user.userNodes = { method: nodeuser.method, password: nodeuser.password, port: body.user.server_port, status: 'working'};
+                node.addUser(user).then((nu)=> {
+                  return res.json(nu);
+                })
+              }
+            })
             .catch(function (err) {
               logger.error('Http POST 请求失败！ 返回: %s %s', err.statusCode,  err.message);
-              user.userNodes = { method: nodeuser.method, password: nodeuser.password};
-              node.addUser(user).then((nu)=> {
-                return res.json(nu);
-              })
+              return res.status(500).json({errors: {message: "与节点通讯失败，请稍后再试！"}});
             });
 
 
@@ -173,8 +178,24 @@ router.delete('/:nodeid/users/:userid', auth.required, function (req, res, next)
 
     if (node) {
       if (node.users && node.users.length) {
-        node.removeUser(node.users[0]).then(() => {
-          return res.json(node);
+        let user = node.users[0];
+        let node_ip = node.node_ip;
+        let node_port = node.node_port;
+        let node_key = node.node_key;
+
+        let url = `http://${node_ip}:${node_port}/api/users/${user.user_name}`;
+
+        del(url, node_key).then(body => {
+
+          if (body.errors) {
+            return res.status(500).json({errors: {message: body.errors.message}});
+          } else {
+            node.removeUser(node.users[0]).then(() => {
+              return res.json(node);
+            });
+          }
+        }).catch(e => {
+          return res.status(500).json({errors: {message: "与节点通讯失败，请稍后再试!"}});
         });
       } else {
         return res.status(404).json({errors: {message: "用户不存在于这个节点下!"}});

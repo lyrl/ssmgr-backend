@@ -36,8 +36,23 @@ function del(url, securityKey) {
   return rp(options);
 }
 
+function get(url, securityKey) {
+  logger.info('Http GET 发起请求到 %s 数据 %s', url);
 
-module.exports = {post, del};
+
+  let options = {
+    method: 'GET',
+    uri: url,
+    headers: {
+      'Authorization': securityKey
+    }
+  };
+
+  return rp(options);
+}
+
+
+module.exports = {post, del, get};
 
 // post('http://127.0.0.1:9999/api/users', {
 //   "user":{
