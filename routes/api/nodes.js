@@ -37,7 +37,7 @@ router.post('/', auth.required, function (req, res, next) {
 
     Node.findAll({
       where: {
-        node_key: req.node.node_key
+        node_key: req.body.node.node_key
       }
     }).then(nodes => {
       if (nodes) {
