@@ -67,9 +67,23 @@ router.put('/:nodeid', auth.required, function (req, res, next) {
     }).then(node => {
         if (!node) {return res.status(404).json({errors: {message: "节点不存在!"}})}
 
-        node.update(req.body.node).then(node => {
-            return res.json({node: {node}})
-        })
+        Node.findAll({
+          where: {
+            node_key: req.body.node.node_key,
+            id: {
+              $ne: node.id
+            }
+          }
+        }).then(nodes => {
+          if (nodes) {
+            return res.status(400).json({errors: {message: "节点通讯密钥不能重复!"}});
+          } else {
+            node.update(req.body.node).then(node => {
+              return res.json({node: {node}})
+            })
+          }
+        });
+
     }).catch(next);
 
 });
