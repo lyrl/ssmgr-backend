@@ -6,7 +6,6 @@ const {post, del, get} = require('./HttpUtil');
 
 
 function sync() {
-
   Node.findAll({
     include: {
         model: User
@@ -61,7 +60,9 @@ function sync() {
 
   });
 
+  logger.info("1分钟后同步用户信息");
 }
 
-setInterval(sync, 30000);
+setInterval(sync, 60000);
+logger.info("1分钟后同步用户信息");
 
