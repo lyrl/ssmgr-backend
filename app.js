@@ -9,6 +9,8 @@ var fs = require('fs'),
     passport = require('passport'),
     errorhandler = require('errorhandler');
 
+require('./component/ScheduleTask');
+
 var isProduction = process.env.NODE_ENV === 'production';
 
 // Create global app object
@@ -86,6 +88,8 @@ app.use(function(err, req, res, next) {
     error: {}
   }});
 });
+
+
 
 // finally, let's start our server...
 var server = app.listen( process.env.PORT || 3001, function(){
