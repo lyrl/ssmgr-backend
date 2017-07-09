@@ -28,7 +28,7 @@ function sync() {
 
       for (let user of node.users) {
         let data = {
-          username: user.username,
+          username: user.user_name,
           password: user.userNodes.password,
           method: user.userNodes.method,
           port: user.userNodes.port
