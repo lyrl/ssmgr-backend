@@ -43,7 +43,7 @@ router.post('/traffics', function (req, res, next) {
             // NetworkActivity.bulkCreate(activities, {returning: true}).then(instances => {
             NetworkActivity.bulkCreate(activities, { individualHooks: true }).then(instances => {
               user.userNodes.addActivities(instances).then(() => {
-                logger.info('用户 %s 端口 %s 网络活动信息保存成功 共 %s 条!', user.user_name, ok.port, activities.length);
+                logger.info('用户 %s 端口 %s 网络活动信息保存成功 共 %s 条!', user.user_name, k, activities.length);
               });
             })
 
