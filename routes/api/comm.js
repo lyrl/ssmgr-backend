@@ -32,8 +32,8 @@ router.post('/traffics', function (req, res, next) {
 
             user.userNodes.update({
               traffic_total: user.userNodes.traffic_total + traffics[k].total,
-              traffic_up: user.userNodes.traffic_total + traffics[k].tcpUp + traffics[k].udpUp ,
-              traffic_down: user.userNodes.traffic_total + traffics[k].tcpDown + traffics[k].udpDown
+              traffic_up: user.userNodes.traffic_up + traffics[k].tcpUp + traffics[k].udpUp ,
+              traffic_down: user.userNodes.traffic_down + traffics[k].tcpDown + traffics[k].udpDown
             }).then(ok => {
               logger.info('用户 %s 端口 %s 当前总流量 %s!', user.user_name, ok.port, ok.traffic_total);
             });
