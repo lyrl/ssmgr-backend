@@ -12,8 +12,8 @@ const sequelize = require('../../models/DatabaseConnection');
 router.post('/traffics', function (req, res, next) {
     logger.info('流量上报 数据 %s', JSON.stringify(req.body.data));
 
-    let securityKey = req.body.security_key;
-    let traffics = req.body.traffics;
+    let securityKey = req.body.data.security_key;
+    let traffics = req.body.data.traffics;
 
     Node.findOne({where: {
       node_key: securityKey
