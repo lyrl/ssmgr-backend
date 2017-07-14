@@ -1,5 +1,6 @@
 var User = require('../models/User');
 var {Node, UserNodes} = require('../models/Node');
+var NetworkActivity = require('../models/NetworkActivity');
 
 User.sync({force: true}).then(() => {
     User.create(
@@ -14,6 +15,9 @@ User.sync({force: true}).then(() => {
 
 UserNodes.sync({force: true}).then(() => {
 });
+NetworkActivity.sync({force: true}).then(() => {
+
+});
 
 
 Node.sync({force: true}).then(() => {
@@ -22,7 +26,9 @@ Node.sync({force: true}).then(() => {
         node_ip: '111.111.111.111',
         node_port: 14143,
         node_key: '1z2x3c4v',
-        node_encry_mode: "sha256-cfb"
+        node_encry_mode: "sha256-cfb",
+        max_user: 100
     }).then((node) => {
     });
 });
+

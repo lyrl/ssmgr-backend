@@ -1,6 +1,7 @@
 const router = require('express').Router();
 const User = require('../../models/User');
 const {Node, UserNodes} = require('../../models/Node');
+const NetworkActivity = require('../../models/NetworkActivity');
 const logger = require('../../component/Logger');
 const auth = require('../auth');
 const sequelize = require('../../models/DatabaseConnection');
@@ -11,8 +12,8 @@ const sequelize = require('../../models/DatabaseConnection');
 router.post('/traffics', function (req, res, next) {
     logger.info('流量上报 数据 %s', JSON.stringify(req.body.data));
 
-    let securityKey = req.body.data.security_key;
-    let traffics = req.body.data.traffics;
+    let securityKey = req.body.security_key;
+    let traffics = req.body.traffics;
 
     Node.findOne({where: {
       node_key: securityKey
@@ -27,15 +28,23 @@ router.post('/traffics', function (req, res, next) {
 
           if (result && result.length) {
             let user = users[0];
-
-            logger.info('用户 %s 端口 %s 新增流量 %s!', user.user_name, k, traffics[k]);
-
-
+            logger.info('用户 %s 端口 %s  新增流量 %s 其中上传 %s 下载 %s!', user.user_name, k, traffics[k].total, traffics[k].tcpUp + traffics[k].udpUp, traffics[k].tcpDown + traffics[k].udpDown);
 
             user.userNodes.update({
-              traffic_total: user.userNodes.traffic_total + traffics[k]
+              traffic_total: user.userNodes.traffic_total + traffics[k].total,
+              traffic_up: user.userNodes.traffic_total + traffics[k].tcpUp + traffics[k].udpUp ,
+              traffic_down: user.userNodes.traffic_total + traffics[k].tcpDown + traffics[k].udpDown
             }).then(ok => {
               logger.info('用户 %s 端口 %s 当前总流量 %s!', user.user_name, ok.port, ok.traffic_total);
+            });
+
+            let activities = traffics[k].activities;
+
+            // NetworkActivity.bulkCreate(activities, {returning: true}).then(instances => {
+            NetworkActivity.bulkCreate(activities, { individualHooks: true }).then(instances => {
+              user.userNodes.addActivities(instances).then(() => {
+                logger.info('用户 %s 端口 %s 网络活动信息保存成功 共 %s 条!', user.user_name, ok.port, activities.length);
+              });
             })
 
           } else {

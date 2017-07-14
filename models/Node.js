@@ -3,6 +3,7 @@ var sequelize = require('./DatabaseConnection');
 var logger = require('../component/Logger');
 
 var User = require('../models/User');
+var NetworkActivity = require('./NetworkActivity');
 
 logger.info('节点数据库模型初始化');
 
@@ -57,6 +58,8 @@ const UserNodes = sequelize.define('userNodes', {
     password: Sequelize.STRING(64),
     port: Sequelize.INTEGER,
     traffic_total: Sequelize.INTEGER,
+    traffic_up: Sequelize.INTEGER,
+    traffic_down: Sequelize.INTEGER,
     status: Sequelize.STRING(24)
 },  {
 
@@ -69,6 +72,6 @@ const UserNodes = sequelize.define('userNodes', {
 
 Node.belongsToMany(User, {through: UserNodes, constraints: false});
 User.belongsToMany(Node, {through: UserNodes, constraints: false});
-
+UserNodes.hasMany(NetworkActivity, {as: 'Activities'});
 
 module.exports = {Node, UserNodes};
